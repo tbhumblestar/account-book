@@ -9,6 +9,8 @@ packages = [{include = "django_project"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = "^4.1.6"
+mysqlclient = "^2.1.1"
+django-environ = "^0.9.0"
 
 
 [build-system]
