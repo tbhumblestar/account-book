@@ -25,12 +25,10 @@ class UserCommon(APIView):
         response.set_cookie(
             "access",
             access_token,
-            httponly=True,
         )
         response.set_cookie(
             "refresh",
             refresh_token,
-            httponly=True,
         )
 
         return response

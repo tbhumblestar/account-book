@@ -9,14 +9,15 @@ class Book(models.Model):
 
 
 class Expense(models.Model):
-    date = models.DateField(
-        auto_now_add=True,
-    )
+    date = models.DateField()
     amount = models.PositiveIntegerField()
     memo = models.TextField(
         max_length=300,
+        blank=True,
+        null=True,
     )
     book = models.ForeignKey(
         Book,
         on_delete=models.CASCADE,
+        related_name="expenses",
     )
