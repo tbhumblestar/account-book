@@ -25,5 +25,11 @@ var = {
         "user": required("DB_USER"),
         "host": required("DB_HOST"),
         "port": required("DB_PORT"),
-    }
+    },
+    "jwt": {
+        "secret": required("JWT_SECRET"),
+    },
+    "cors": {
+        "domain": required("CORS_DOMAIN"),
+    },
 }

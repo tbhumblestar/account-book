@@ -48,6 +48,7 @@ SYSTEM_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "corsheaders",
 ]
 
 CUSTOM_APPS = [
@@ -57,10 +58,23 @@ CUSTOM_APPS = [
 
 INSTALLED_APPS = SYSTEM_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
+SIMPLE_JWT = {
+    "TOKEN_USER_CLASS": "users.User",
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -147,3 +161,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # AUTH
 AUTH_USER_MODEL = "users.User"
+
+# CORS
+CORS_ALLOWED_ORIGINS = [
+    var["cors"]["domain"],
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    var["cors"]["domain"],
+]
