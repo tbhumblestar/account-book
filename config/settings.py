@@ -61,16 +61,13 @@ INSTALLED_APPS = SYSTEM_APPS + THIRD_PARTY_APPS + CUSTOM_APPS
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "config.middleware.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
 
-SIMPLE_JWT = {
-    "TOKEN_USER_CLASS": "users.User",
-}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

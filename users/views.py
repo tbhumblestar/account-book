@@ -1,42 +1,19 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import check_password
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+import jwt
 from books.models import Book
 from users.serializers import *
-
-
-class UserCommon(APIView):
-    def get_response_with_token(self, user):
-        token = TokenObtainPairSerializer().get_token(user)
-        refresh_token = str(token)
-        access_token = str(token.access_token)
-
-        response = Response(
-            {
-                "access": access_token,
-                "refresh": refresh_token,
-            },
-            status=status.HTTP_200_OK,
-        )
-        response.set_cookie(
-            "access",
-            access_token,
-        )
-        response.set_cookie(
-            "refresh",
-            refresh_token,
-        )
-
-        return response
+from config.var import var
 
 
 # users/
 # POST
-class Users(UserCommon):
+class Users(APIView):
 
     permission_classes = [AllowAny]
     serializer_class = SignupSerializer
@@ -47,8 +24,9 @@ class Users(UserCommon):
         if serializer.is_valid():
             user = serializer.save()
             Book.objects.create(user=user)
-            response = self.get_response_with_token(user)
-            return response
+            return Response(
+                status=status.HTTP_201_CREATED,
+            )
         else:
             return Response(
                 serializer.errors,
@@ -58,7 +36,7 @@ class Users(UserCommon):
 
 # users/login
 # POST
-class Login(UserCommon):
+class Login(APIView):
 
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
@@ -70,26 +48,36 @@ class Login(UserCommon):
             raise AuthenticationFailed("Email does not exist")
 
     def post(self, request):
-        serializers = LoginSerializer(data=request.data)
+        serializer = LoginSerializer(data=request.data)
 
-        if serializers.is_valid():
-            self.get_object(request.data.get("email"))
-
-            user = authenticate(
-                request,
-                email=request.data.get("email"),
-                password=request.data.get("password"),
+        if serializer.is_valid():
+            user = self.get_object(serializer.data.get("email"))
+            password_check = check_password(
+                serializer.data.get("password"), user.password
             )
-
-            if not user:
+            if not password_check:
                 raise AuthenticationFailed("Password wrong")
 
-            response = self.get_response_with_token(user)
-            return response
+            expired_at = str(
+                timezone.now() + timezone.timedelta(days=var["jwt"]["expired_days"])
+            )
+            encoded = jwt.encode(
+                {
+                    "pk": user.pk,
+                    "expired_at": expired_at,
+                },
+                var["jwt"]["secret"],
+                algorithm="HS256",
+            )
+
+            return Response(
+                {"token": encoded},
+                status=status.HTTP_200_OK,
+            )
 
         else:
             return Response(
-                serializers.errors,
+                serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -98,7 +86,6 @@ class Login(UserCommon):
 # POST
 class Logout(APIView):
     def post(self, request):
-        response = Response(status=status.HTTP_202_ACCEPTED)
-        response.delete_cookie("access")
-        response.delete_cookie("refresh")
-        return response
+        return Response(
+            status=status.HTTP_200_OK,
+        )

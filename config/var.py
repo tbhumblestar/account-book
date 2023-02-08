@@ -28,6 +28,7 @@ var = {
     },
     "jwt": {
         "secret": required("JWT_SECRET"),
+        "expired_days": required("JWT_EXPIRED_DAYS", 3),
     },
     "cors": {
         "domain": required("CORS_DOMAIN"),
