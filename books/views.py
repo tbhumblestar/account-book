@@ -80,7 +80,7 @@ class ExpenseDetail(APIView):
             status=status.HTTP_200_OK,
         )
 
-    def put(self, request, pk):
+    def patch(self, request, pk):
         expense = self.get_object(pk)
         serializer = ExpenseSerailizer(
             instance=expense,
