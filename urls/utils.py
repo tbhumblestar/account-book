@@ -2,7 +2,8 @@ BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 def encode(num, alphabet=BASE62):
-    """Encode a positive number into Base X and return the string.
+    """
+    Encode a positive number into Base X and return the string.
 
     Arguments:
     - `num`: The number to encode
@@ -22,7 +23,8 @@ def encode(num, alphabet=BASE62):
 
 
 def decode(string, alphabet=BASE62):
-    """Decode a Base X encoded string into the number
+    """
+    Decode a Base X encoded string into the number
 
     Arguments:
     - `string`: The encoded string

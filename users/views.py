@@ -25,6 +25,7 @@ class Users(APIView):
             user = serializer.save()
             Book.objects.create(user=user)
             return Response(
+                UserSerializer(user).data,
                 status=status.HTTP_201_CREATED,
             )
         else:

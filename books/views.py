@@ -2,17 +2,18 @@ from django.db.models import Sum
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied, ParseError
 from books.models import Expense
 from books.serializers import ExpenseSerailizer
-from datetime import date as datetime
+import datetime
 
 # book/year/month
 # GET
 class Monthly(APIView):
     def get(self, request, year, month):
+        book = request.user.book
         expense_list = (
-            Expense.objects.filter(
+            book.expenses.filter(
                 date__year=year,
                 date__month=month,
             )
@@ -24,18 +25,28 @@ class Monthly(APIView):
         expenses = dict()
         for per_date in list(expense_list):
             date, amount = per_date.values()
-            expenses[date] = amount
+            expenses[str(date)] = amount
 
-        return Response(expenses)
+        return Response(
+            expenses,
+            status=status.HTTP_200_OK,
+        )
 
 
 # book/year/month/date
 # GET POST
 class Daily(APIView):
+    def check_date(self, year, month, date):
+        try:
+            return datetime.date(year, month, date)
+        except ValueError:
+            raise ParseError("Invalid date")
+
     def get(self, request, year, month, date):
-        expense_objects = Expense.objects.filter(
-            book__user=request.user,
-            date=datetime(year, month, date),
+        date = self.check_date(year, month, date)
+        book = request.user.book
+        expense_objects = book.expenses.filter(
+            date=date,
         )
         expense_list = ExpenseSerailizer(expense_objects, many=True)
 
@@ -45,10 +56,12 @@ class Daily(APIView):
         )
 
     def post(self, request, year, month, date):
+        date = self.check_date(year, month, date)
         serializer = ExpenseSerailizer(data=request.data)
+
         if serializer.is_valid():
             expense = serializer.save(
-                date=datetime(year, month, date),
+                date=date,
                 book=request.user.book,
             )
 
@@ -64,7 +77,7 @@ class Daily(APIView):
             )
 
 
-# book/expense/pk
+# book/expenses/pk
 # GET PUT POST
 class ExpenseDetail(APIView):
     def get_object(self, pk):
@@ -82,6 +95,10 @@ class ExpenseDetail(APIView):
 
     def patch(self, request, pk):
         expense = self.get_object(pk)
+
+        if request.user != expense.book.user:
+            raise PermissionDenied("Permission Denied")
+
         serializer = ExpenseSerailizer(
             instance=expense,
             data=request.data,
@@ -103,6 +120,10 @@ class ExpenseDetail(APIView):
 
     def post(self, request, pk):
         expense = self.get_object(pk)
+
+        if request.user != expense.book.user:
+            raise PermissionDenied("Permission Denied")
+
         expense.pk = None
         expense._state.adding = True
         expense.save()

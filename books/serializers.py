@@ -3,6 +3,8 @@ from .models import Expense
 
 
 class ExpenseSerailizer(serializers.ModelSerializer):
+    date = serializers.DateField(read_only=True)
+
     class Meta:
         model = Expense
         fields = (
