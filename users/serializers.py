@@ -25,4 +25,5 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.Serializer):
+    pk = serializers.IntegerField()
     email = serializers.EmailField()
