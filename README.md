@@ -11,7 +11,7 @@
 | GET /book/{year}/{month}/{date}  | 일별 가계부 내역 조회      |
 | POST /book/{year}/{month}/{date} | 일별 가계부 내역 생성      |
 | GET /book/expenses/{expense_id}  | 가계부 세부 내역 조회      |
-| PATC /book/expenses/{expense_id} | 가계부 세부 내역 수정      |
+| PATCH /book/expenses/{expense_id} | 가계부 세부 내역 수정      |
 | POST /book/expenses/{expense_id} | 가계부 세부 내역 복제      |
 | GET /urls?encoded={encoded_id}   | 원본 URL 조회              |
 | POST /urls/                      | 단축 URL 생성              |
